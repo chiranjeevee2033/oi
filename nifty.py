@@ -235,7 +235,7 @@ def get_worksheet():
 
     gc = gspread.authorize(creds)
     return gc.open_by_key(
-        "1qrpBjK-qBRA85y_kNiRUGQ50U1AmTEX5cPooCPvZ4gw"
+        "15LE3DlLub6yGC1QkqOTB_AOPGQACQtz22KQY5QJZuAw"
     ).worksheet("NIFTY")
 
 
