@@ -1,65 +1,3 @@
-'''import requests
-import pandas as pd
-from datetime import datetime
-import pytz
-
-# 👇 import your existing helper (NO CHANGES to that file)
-from google_sheets import update_google_sheet_by_name, append_footer
-
-# ================= CONFIG =================
-SHEET_ID = "1qrpBjK-qBRA85y_kNiRUGQ50U1AmTEX5cPooCPvZ4gw"
-WORKSHEET_NAME = "NSPRUT"
-
-URL = "https://www.nseindia.com/api/live-analysis-oi-spurts-underlyings"
-
-HEADERS_HTTP = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/120.0.0.0 Safari/537.36",
-    "Referer": "https://www.nseindia.com/market-data/oi-spurts"
-}
-
-# ================= FETCH DATA =================
-session = requests.Session()
-session.get("https://www.nseindia.com", headers=HEADERS_HTTP)
-
-response = session.get(URL, headers=HEADERS_HTTP)
-response.raise_for_status()
-
-json_data = response.json()
-df = pd.DataFrame(json_data.get("data", []))
-
-# ================= LIMIT TO FIRST 35 =================
-df = df.head(35)
-
-# ================= PREPARE FOR GSHEET =================
-headers = list(df.columns)
-rows = df.astype(str).values.tolist()  # convert to list of lists
-
-# ================= PUSH TO GOOGLE SHEET =================
-update_google_sheet_by_name(
-    sheet_id=SHEET_ID,
-    worksheet_name=WORKSHEET_NAME,
-    headers=headers,
-    rows=rows
-)
-
-# ================= FOOTER =================
-ist = pytz.timezone("Asia/Kolkata")
-timestamp = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S IST")
-
-# Timestamp in FIRST column
-footer = [timestamp] + [""] * (len(headers) - 1)
-
-append_footer(
-    sheet_id=SHEET_ID,
-    worksheet_name=WORKSHEET_NAME,
-    footer_row=footer
-)
-
-
-
-'''
 import requests
 import pandas as pd
 import time
@@ -139,20 +77,29 @@ def main():
     print("✅ Data fetched")
 
     ws = get_worksheet()
-
-    # ---- Write headers (A1 onward, safe) ----
-    ws.update("A1", [df.columns.tolist()])
-
-    # ---- Write data (A2 onward, NUMBERS stay numbers) ----
-    ws.update("A2", df.values.tolist())
+    
+    existing_data = ws.get_all_values()
+    
+    # Add header only if sheet empty
+    if not existing_data:
+    
+        header_row = ["TIME"] + df.columns.tolist()
+    
+        ws.append_row(header_row)
 
     # ---- Timestamp ONLY in Column A, last row ----
     ist = pytz.timezone("Asia/Kolkata")
     timestamp = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S IST")
 
-    last_row = len(df) + 2
-    ws.update_cell(last_row, 1, timestamp)
+    rows_to_append = []
 
+    for row in df.values.tolist():
+    
+        rows_to_append.append(
+            [timestamp] + row
+        )
+    
+    ws.append_rows(rows_to_append)
     print("🎉 SUCCESS: Sheet updated safely")
 
 # ==========================
