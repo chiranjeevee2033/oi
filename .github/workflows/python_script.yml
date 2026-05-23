@@ -2,7 +2,7 @@ name: NSE OI Sprut to Google Sheet
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 2-11 * * *"
   workflow_dispatch:
 
 jobs:
