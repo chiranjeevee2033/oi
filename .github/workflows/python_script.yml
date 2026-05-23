@@ -27,12 +27,13 @@ jobs:
           echo "NEW<<EOF" >> $GITHUB_ENV
           echo '${{ secrets.NEW }}' >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-      - name: 🚀 Run AI script
-        run: |
-          python ai.py
       - name: 🚀 Run NSE script
         run: |
           python nsesprut.py
+      - name: 🚀 Run AI script
+        run: |
+          python ai.py
+
           
       - name: 🚀 Run NSE script
         run: |
