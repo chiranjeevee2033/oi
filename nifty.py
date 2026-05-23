@@ -179,19 +179,18 @@ def main():
         values = fetch_totals(session, symbol, expiry)
     
         rows.append([
-            datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%d-%m-%Y %H:%M:%S"),
+            #datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%d-%m-%Y %H:%M:%S"),
             symbol,
             *values
         ])
 
     ws.append_rows(rows)
 
-    # now = datetime.now(ZoneInfo("Asia/Kolkata"))
-    # ws.update(
-    #     f"A{len(rows) + 2}",
-    #     [[now.strftime("%d-%m-%Y %H:%M:%S IST")]]
-    # )
-
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    
+    ws.append_row([
+        now.strftime("%d-%m-%Y %H:%M:%S IST")
+    ])
     print("✅ Calendar-based expiry logic applied successfully")
 
 
