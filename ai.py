@@ -3,7 +3,7 @@ import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
-
+from zoneinfo import ZoneInfo
 # =========================
 # CONFIG
 # =========================
@@ -100,8 +100,10 @@ max_len = max(len(up_list), len(down_list))
 
 rows_to_add = []
 
-timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+timestamp = datetime.now(
+    ZoneInfo("Asia/Kolkata")
+).strftime("%Y-%m-%d %H:%M:%S IST")
 # Header row (only once if sheet empty)
 if len(output_ws.get_all_values()) == 0:
     output_ws.append_row([
@@ -112,8 +114,8 @@ if len(output_ws.get_all_values()) == 0:
 
 # Data rows
 for i in range(max_len):
-    up = up_list[i] if i < len(up_list) else ("", "", "")
-    down = down_list[i] if i < len(down_list) else ("", "", "")
+    up = up_list[i] if i < len(up_list) else ("", "", "", "")
+    down = down_list[i] if i < len(down_list) else ("", "", "", "")
 
     rows_to_add.append([
         timestamp if i == 0 else "",
