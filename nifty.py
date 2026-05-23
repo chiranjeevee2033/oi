@@ -13,16 +13,24 @@ from zoneinfo import ZoneInfo
 # -------------------------------------------------
 def get_nse_session():
     session = requests.Session()
+
     session.headers.update({
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json",
-        "Referer": "https://www.nseindia.com/"
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/137.0.0.0 Safari/537.36"
+        ),
+        "Accept": "application/json,text/plain,*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.nseindia.com/",
+        "Connection": "keep-alive"
     })
-    session.get("https://www.nseindia.com", timeout=10)
-    time.sleep(1)
+
+    session.get("https://www.nseindia.com", timeout=20)
+
+    time.sleep(2)
+
     return session
-
-
 # -------------------------------------------------
 # 2️⃣ NIFTY → NEXT TUESDAY
 # -------------------------------------------------
@@ -75,26 +83,49 @@ def get_monthly_last_tuesday():
 # 5️⃣ FETCH TOTAL OI & VOLUME
 # -------------------------------------------------
 def fetch_totals(session, symbol, expiry):
+
     url = (
         "https://www.nseindia.com/api/option-chain-v3"
         f"?type=Indices&symbol={symbol}&expiry={expiry}"
     )
 
-    data = session.get(url, timeout=10).json()
+    for attempt in range(3):
 
-    ce_oi = ce_vol = pe_oi = pe_vol = 0
+        try:
 
-    for row in data.get("records", {}).get("data", []):
-        if "CE" in row:
-            ce_oi += row["CE"].get("openInterest", 0)
-            ce_vol += row["CE"].get("totalTradedVolume", 0)
-        if "PE" in row:
-            pe_oi += row["PE"].get("openInterest", 0)
-            pe_vol += row["PE"].get("totalTradedVolume", 0)
+            response = session.get(url, timeout=30)
 
-    return ce_oi, ce_vol, pe_oi, pe_vol
+            print(symbol, "STATUS:", response.status_code)
 
+            if response.status_code != 200:
+                time.sleep(3)
+                continue
 
+            data = response.json()
+
+            ce_oi = ce_vol = pe_oi = pe_vol = 0
+
+            for row in data.get("records", {}).get("data", []):
+
+                if "CE" in row:
+                    ce_oi += row["CE"].get("openInterest", 0)
+                    ce_vol += row["CE"].get("totalTradedVolume", 0)
+
+                if "PE" in row:
+                    pe_oi += row["PE"].get("openInterest", 0)
+                    pe_vol += row["PE"].get("totalTradedVolume", 0)
+
+            return ce_oi, ce_vol, pe_oi, pe_vol
+
+        except Exception as e:
+
+            print(f"{symbol} Retry {attempt+1} Failed:", e)
+
+            time.sleep(3)
+
+    print(f"{symbol} FAILED AFTER 3 RETRIES")
+
+    return 0, 0, 0, 0
 # -------------------------------------------------
 # 6️⃣ GOOGLE SHEETS
 # -------------------------------------------------
@@ -123,19 +154,33 @@ def main():
     ws = get_worksheet()
 
     ws.batch_clear(["A:E"])
-    ws.update("A1", [["SYMBOL", "CE_OI", "CE_VOL", "PE_OI", "PE_VOL"]])
+    ws.update(
+        values=[["SYMBOL", "CE_OI", "CE_VOL", "PE_OI", "PE_VOL"]],
+        range_name="A1"
+    )
 
     nifty_expiry = get_next_tuesday()
     bank_expiry = get_monthly_last_tuesday()
     finn_expiry = bank_expiry
 
-    rows = [
-        ["BANKNIFTY", *fetch_totals(session, "BANKNIFTY", bank_expiry)],
-        ["NIFTY", *fetch_totals(session, "NIFTY", nifty_expiry)],
-        ["FINNIFTY", *fetch_totals(session, "FINNIFTY", finn_expiry)],
+    rows = []
+    
+    symbols = [
+        ("BANKNIFTY", bank_expiry),
+        ("NIFTY", nifty_expiry),
+        ("FINNIFTY", finn_expiry)
     ]
+    
+    for symbol, expiry in symbols:
+    
+        values = fetch_totals(session, symbol, expiry)
+    
+        rows.append([symbol, *values])
 
-    ws.update("A2", rows)
+    ws.update(
+        values=rows,
+        range_name="A2"
+    )
 
     now = datetime.now(ZoneInfo("Asia/Kolkata"))
     ws.update(
