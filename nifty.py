@@ -153,12 +153,15 @@ def main():
     session = get_nse_session()
     ws = get_worksheet()
 
-    ws.batch_clear(["A:E"])
-    ws.update(
-        values=[["SYMBOL", "CE_OI", "CE_VOL", "PE_OI", "PE_VOL"]],
-        range_name="A1"
-    )
-
+    existing_data = ws.get_all_values()
+    
+    # Add header only if sheet empty
+    if not existing_data:
+    
+        ws.update(
+            values=[["TIME", "SYMBOL", "CE_OI", "CE_VOL", "PE_OI", "PE_VOL"]],
+            range_name="A1"
+        )
     nifty_expiry = get_next_tuesday()
     bank_expiry = get_monthly_last_tuesday()
     finn_expiry = bank_expiry
@@ -175,18 +178,19 @@ def main():
     
         values = fetch_totals(session, symbol, expiry)
     
-        rows.append([symbol, *values])
+        rows.append([
+            datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%d-%m-%Y %H:%M:%S"),
+            symbol,
+            *values
+        ])
 
-    ws.update(
-        values=rows,
-        range_name="A2"
-    )
+    ws.append_rows(rows)
 
-    now = datetime.now(ZoneInfo("Asia/Kolkata"))
-    ws.update(
-        f"A{len(rows) + 2}",
-        [[now.strftime("%d-%m-%Y %H:%M:%S IST")]]
-    )
+    # now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    # ws.update(
+    #     f"A{len(rows) + 2}",
+    #     [[now.strftime("%d-%m-%Y %H:%M:%S IST")]]
+    # )
 
     print("✅ Calendar-based expiry logic applied successfully")
 
