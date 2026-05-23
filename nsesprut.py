@@ -74,7 +74,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 # ==========================
 # CONFIG
 # ==========================
-SHEET_ID = "1qrpBjK-qBRA85y_kNiRUGQ50U1AmTEX5cPooCPvZ4gw"
+SHEET_ID = "15LE3DlLub6yGC1QkqOTB_AOPGQACQtz22KQY5QJZuAw"
 WORKSHEET_NAME = "NSPRUT"
 
 BASE_URL = "https://www.nseindia.com"
