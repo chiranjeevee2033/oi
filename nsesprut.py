@@ -83,7 +83,7 @@ def main():
     # Add header only if sheet empty
     if not existing_data:
     
-        header_row = ["TIME"] + df.columns.tolist()
+        header_row = df.columns.tolist()
     
         ws.append_row(header_row)
 
@@ -91,15 +91,13 @@ def main():
     ist = pytz.timezone("Asia/Kolkata")
     timestamp = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S IST")
 
-    rows_to_append = []
-
-    for row in df.values.tolist():
+    rows_to_append = df.values.tolist()
     
-        rows_to_append.append(
-            [timestamp] + row
-        )
-    
+    # append all data rows
     ws.append_rows(rows_to_append)
+    
+    # append ONE timestamp row at end
+    ws.append_row([timestamp])
     print("🎉 SUCCESS: Sheet updated safely")
 
 # ==========================
