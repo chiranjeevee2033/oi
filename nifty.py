@@ -153,7 +153,7 @@ def main():
     session = get_nse_session()
     ws = get_worksheet()
 
-    existing_data = ws.get_all_values()
+    existing_data = ws.get_all_values(1)
     
     # Add header only if sheet empty
     if not existing_data:
