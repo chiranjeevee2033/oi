@@ -62,7 +62,7 @@ def fetch_oi_spurts():
     r.raise_for_status()
 
     df = pd.DataFrame(r.json().get("data", []))
-    return df.head(35)
+    return df
 
 # ==========================
 # MAIN
