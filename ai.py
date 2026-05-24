@@ -55,8 +55,8 @@ headers = data[0]
 rows = data[1:]
 
 symbol_i = find_col(headers, "symbol")
-oi_i = find_col(headers, "OI-Chang")
-spot_i = find_col(headers, "oi spot")
+oi_i = find_col(headers, "changeInOI")
+spot_i = find_col(headers, "avgInOI")
 
 up_list = []
 down_list = []
