@@ -32,9 +32,7 @@ jobs:
           python nsesprut.py
       - name: 🚀 Run AI script
         run: |
-          python ai.py
-
-          
+          python ai.py          
       - name: 🚀 Run NSE script
         run: |
           python nifty.py
