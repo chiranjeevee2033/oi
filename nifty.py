@@ -179,12 +179,18 @@ def main():
         values = fetch_totals(session, symbol, expiry)
     
         rows.append([
-            #datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%d-%m-%Y %H:%M:%S"),
             symbol,
             *values
         ])
 
-    ws.append_rows(rows)
+    start_row = len(existing_data) + 1
+    end_row = start_row + len(rows) - 1
+    
+    ws.update(
+        range_name=f"A{start_row}:E{end_row}",
+        values=rows
+    )
+
 
     now = datetime.now(ZoneInfo("Asia/Kolkata"))
     
