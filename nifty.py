@@ -194,9 +194,12 @@ def main():
 
     now = datetime.now(ZoneInfo("Asia/Kolkata"))
     
-    ws.append_row([
-        now.strftime("%d-%m-%Y %H:%M:%S IST")
-    ])
+    time_row = len(ws.col_values(1)) + 1
+    
+    ws.update(
+        range_name=f"A{time_row}",
+        values=[[now.strftime("%d-%m-%Y %H:%M:%S IST")]]
+    )
     print("✅ Calendar-based expiry logic applied successfully")
 
 
