@@ -80,7 +80,7 @@ for r in rows:
             up_list.append((symbol, oi, spot, score))
 
         # DOWN
-        elif oi > 5 and spot < 0:
+        elif oi < 0 and spot < 0:
             score = oi + (abs(spot) * 10)
             down_list.append((symbol, oi, spot, score))
 
